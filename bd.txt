@@ -1,0 +1,152 @@
+CREATE DATABASE TalentoTroyano_DB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE TalentoTroyano_DB;
+
+-- =========================================================
+-- TABLA: Users
+-- =========================================================
+CREATE TABLE Users (
+    idUser INT AUTO_INCREMENT PRIMARY KEY,
+    usName VARCHAR(100) NOT NULL,
+    usLastName VARCHAR(100) NOT NULL,
+    expedient VARCHAR(50),
+    usBirthday DATE,
+    usPhoneNumber VARCHAR(20),
+    usEmail VARCHAR(100) UNIQUE NOT NULL,
+    usPassword VARCHAR(255) NOT NULL,
+    usProfilePicture VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- =========================================================
+-- TABLA: Documents
+-- =========================================================
+CREATE TABLE Documents (
+    idDocument INT AUTO_INCREMENT PRIMARY KEY,
+    modDate DATE,
+    docRoute VARCHAR(255),
+    idUser INT NOT NULL,
+    FOREIGN KEY (idUser) REFERENCES Users(idUser) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =========================================================
+-- TABLA: Messages
+-- =========================================================
+CREATE TABLE Messages (
+    idMess INT AUTO_INCREMENT PRIMARY KEY,
+    textMess TEXT NOT NULL
+) ENGINE=InnoDB;
+
+-- =========================================================
+-- TABLA: Notifications
+-- =========================================================
+CREATE TABLE Notifications (
+    idNotification INT AUTO_INCREMENT PRIMARY KEY,
+    idUser INT NOT NULL,
+    idMess INT NOT NULL,
+    notDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `read` BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (idUser) REFERENCES Users(idUser) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idMess) REFERENCES Messages(idMess) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =========================================================
+-- TABLA: Companies
+-- =========================================================
+CREATE TABLE Companies (
+    idCompany INT AUTO_INCREMENT PRIMARY KEY,
+    compName VARCHAR(150) NOT NULL
+) ENGINE=InnoDB;
+
+-- =========================================================
+-- TABLA: Admins
+-- =========================================================
+CREATE TABLE Admins (
+    idAdmin INT AUTO_INCREMENT PRIMARY KEY,
+    idCompany INT NOT NULL,
+    adName VARCHAR(100) NOT NULL,
+    adLastName VARCHAR(100) NOT NULL,
+    adEmail VARCHAR(100) UNIQUE NOT NULL,
+    adPassword VARCHAR(255) NOT NULL,
+    adPhoneNumber VARCHAR(20),
+    adProfilePicture VARCHAR(255),
+    FOREIGN KEY (idCompany) REFERENCES Companies(idCompany) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =========================================================
+-- TABLA: Statistics
+-- =========================================================
+CREATE TABLE Statistics (
+    idStatistics INT AUTO_INCREMENT PRIMARY KEY,
+    idCompany INT NOT NULL,
+    idAdmin INT NOT NULL,
+    staName VARCHAR(150),
+    `date` DATE,
+    FOREIGN KEY (idCompany) REFERENCES Companies(idCompany) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idAdmin) REFERENCES Admins(idAdmin) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =========================================================
+-- TABLAS DE CATÁLOGOS: States, Modality, Programs
+-- =========================================================
+CREATE TABLE States (
+    idState INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE Modality (
+    idModality INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE Programs (
+    idPrograms INT AUTO_INCREMENT PRIMARY KEY,
+    prName VARCHAR(150) NOT NULL
+) ENGINE=InnoDB;
+
+-- =========================================================
+-- TABLA: Vacant
+-- =========================================================
+CREATE TABLE Vacant (
+    idVacant INT AUTO_INCREMENT PRIMARY KEY,
+    idModality INT NOT NULL,
+    idState INT NOT NULL,
+    idPrograms INT NOT NULL,
+    idAdmin INT NOT NULL,
+    idCompany INT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    description TEXT,
+    requirements TEXT,
+    location VARCHAR(150),
+    typeContract VARCHAR(100),
+    salary DECIMAL(10,2),
+    schedule VARCHAR(100),
+    vacDate DATE,
+    FOREIGN KEY (idModality) REFERENCES Modality(idModality) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idState) REFERENCES States(idState) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idPrograms) REFERENCES Programs(idPrograms) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idAdmin) REFERENCES Admins(idAdmin) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idCompany) REFERENCES Companies(idCompany) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =========================================================
+-- TABLA: Postulations (Optimizada)
+-- =========================================================
+CREATE TABLE Postulations (
+    idPostulation INT AUTO_INCREMENT PRIMARY KEY,
+    idVacant INT NOT NULL,
+    idState INT NOT NULL,
+    idUser INT NOT NULL,
+    idAdmin INT NOT NULL,
+    idModality INT NOT NULL,
+    idCompany INT NOT NULL,
+    idPrograms INT NOT NULL,
+    postDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Pendiente','Aceptada','Rechazada') DEFAULT 'Pendiente',
+    FOREIGN KEY (idVacant) REFERENCES Vacant(idVacant) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idState) REFERENCES States(idState) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idUser) REFERENCES Users(idUser) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idAdmin) REFERENCES Admins(idAdmin) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idModality) REFERENCES Modality(idModality) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idCompany) REFERENCES Companies(idCompany) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (idPrograms) REFERENCES Programs(idPrograms) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
