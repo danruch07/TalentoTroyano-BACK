@@ -21,9 +21,4 @@ class AppServiceProvider extends ServiceProvider
     {
         //
     }
-
-    protected $policies = [
-    \App\Models\Document::class => \App\Policies\DocumentPolicy::class,
-];
-
 }
