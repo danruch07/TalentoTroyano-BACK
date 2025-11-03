@@ -6,6 +6,10 @@ use App\Modules\Vacantes\Controllers\VacanteController;
 use App\Modules\Vacantes\Controllers\PostulationController;
 use App\Modules\Vacantes\Controllers\StatsController;
 
+require base_path('app/Modules/Autenticacion/rutas.php');
+require base_path('app/Modules/Usuarios/rutas.php');
+require base_path('app/Modules/Documentos/rutas.php');
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
