@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Usuario extends Authenticatable {
     use HasApiTokens, Notifiable, HasFactory;
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = null; 
 
     protected $table = 'Users';
     protected $primaryKey = 'idUser';
