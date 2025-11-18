@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('usPhoneNumber', 20)->nullable();
             $table->string('usEmail', 100)->unique();
             $table->string('usPassword', 255);
+            $table->string('usDescriition', 255)->nullable();
             $table->string('usProfilePicture', 255)->nullable();
             $table->timestamps();
         });

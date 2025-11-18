@@ -11,15 +11,15 @@ return new class extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->id('idCompany');
             $table->string('compName', 150);
+            $table->string('ubicacion', 255)->nullable();
+            $table->string('telefono', 20)->nullable();
+            $table->string('email', 100)->nullable();
+            $table->text('descripcion')->nullable();
+            $table->string('industria', 100)->nullable();
+            $table->string('rfc', 13)->nullable();
+            $table->string('imagen', 255)->nullable(); // Ruta de la imagen de perfil
             $table->timestamps();
         });
-
-        // Insertar empresa UAQ
-        DB::table('companies')->insert([
-            'compName' => 'Universidad Autónoma de Querétaro',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
     }
 
     public function down()

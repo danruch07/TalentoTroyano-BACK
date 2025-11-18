@@ -27,16 +27,6 @@ return new class extends Migration
                   ->onUpdate('cascade');
         });
 
-        // Insertar administrador UAQ
-        DB::table('admins')->insert([
-            'adName' => 'Administrador',
-            'adLastName' => 'UAQ',
-            'adEmail' => 'admin@uaq.mx',
-            'adPassword' => 'null',
-            'idCompany' => 1,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
     }
 
     public function down()
