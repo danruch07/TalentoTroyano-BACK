@@ -4,15 +4,15 @@ namespace App\Modules\Vacantes\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Modules\Vacantes\Models\Vacante;
+use App\Modules\Usuarios\Models\Usuario;
 
 class Postulation extends Model
 {
     use HasFactory;
 
     protected $table = 'postulations';
-
     protected $primaryKey = 'idPostulation';
-
     public $timestamps = false;
 
     protected $fillable = [
@@ -24,14 +24,15 @@ class Postulation extends Model
         'idCompany',
         'idPrograms',
         'postDate',
-        'status'
+        'status',
     ];
 
     protected $casts = [
-        'postDate' => 'date',
+        'postDate' => 'datetime',
     ];
 
     // Relaciones
+
     public function vacante()
     {
         return $this->belongsTo(Vacante::class, 'idVacant', 'idVacant');
@@ -39,7 +40,8 @@ class Postulation extends Model
 
     public function user()
     {
-        return $this->belongsTo(\App\Modules\Users\Models\User::class, 'idUser');
+        // Usa tu modelo modular de usuarios
+        return $this->belongsTo(Usuario::class, 'idUser', 'idUser');
     }
 
     public function state()
@@ -49,7 +51,7 @@ class Postulation extends Model
 
     public function admin()
     {
-        return $this->belongsTo(\App\Modules\Admins\Models\Admin::class, 'idAdmin');
+        return $this->belongsTo(\App\Modules\Companies\Models\AdminCompany::class, 'idAdmin', 'idAdmin');
     }
 
     public function modality()
@@ -59,11 +61,12 @@ class Postulation extends Model
 
     public function company()
     {
-        return $this->belongsTo(\App\Modules\Companies\Models\Company::class, 'idCompany');
+        return $this->belongsTo(\App\Modules\Companies\Models\Company::class, 'idCompany', 'idCompany');
     }
 
     public function program()
     {
-        return $this->belongsTo(\App\Modules\Programs\Models\Program::class, 'idPrograms');
+        return $this->belongsTo(\App\Modules\Programs\Models\Program::class, 'idPrograms', 'idPrograms');
     }
 }
+

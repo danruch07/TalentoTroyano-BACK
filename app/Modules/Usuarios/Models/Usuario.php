@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Modules\Usuarios\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -6,26 +7,68 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Usuario extends Authenticatable {
+class Usuario extends Authenticatable
+{
     use HasApiTokens, Notifiable, HasFactory;
-    const CREATED_AT = 'created_at';
-    const UPDATED_AT = null; 
 
-    protected $table = 'Users';
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
+
+    /**
+     * Tabla física en base de datos.
+     * Se unifica con la migración create_users_table (tabla 'users').
+     */
+    protected $table = 'users';
+
     protected $primaryKey = 'idUser';
     public $incrementing = true;
     protected $keyType = 'int';
 
-    // Campos del DER
+    /**
+     * Campos que se pueden asignar en masa.
+     */
     protected $fillable = [
-        'usName','usLastName','expedient','usBirthday',
-        'usPhoneNumber','usEmail','usPassword','usProfilePicture',
+        'usName',
+        'usLastName',
+        'expedient',
+        'usBirthday',
+        'usPhoneNumber',
+        'usEmail',
+        'usPassword',
+        'usDescriition',
+        'usProfilePicture',
     ];
 
-    // Oculta hash
-    protected $hidden = ['usPassword'];
+    /**
+     * Campos ocultos al serializar a JSON.
+     */
+    protected $hidden = [
+        'usPassword',
+        'remember_token',
+    ];
 
-    // Laravel espera "password" al autenticar con helpers tradicionales.
-    // Nosotros autenticamos manualmente con usPassword, pero definimos accessor:
-    public function getAuthPassword() { return $this->usPassword; }
+    /**
+     * Accessor requerido por Laravel para password.
+     */
+    public function getAuthPassword()
+    {
+        return $this->usPassword;
+    }
+
+    /**
+     * Relación: documentos (CV, etc.) del usuario.
+     */
+    public function documentos()
+    {
+        return $this->hasMany(\App\Modules\Documentos\Models\Documento::class, 'idUser', 'idUser');
+    }
+
+    /**
+     * Relación: postulaciones a vacantes.
+     */
+    public function postulations()
+    {
+        return $this->hasMany(\App\Modules\Vacantes\Models\Postulation::class, 'idUser', 'idUser');
+    }
 }
+

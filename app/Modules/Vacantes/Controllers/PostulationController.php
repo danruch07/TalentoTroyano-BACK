@@ -15,115 +15,103 @@ class PostulationController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $query = Postulation::with(['vacante']);
+            $query = Postulation::query()->with(['vacante', 'user', 'program']);
 
             if ($request->filled('status')) {
                 $query->where('status', $request->status);
             }
 
-            if ($request->filled('idState')) {
-                $query->where('idState', $request->idState);
-            }
+            $postulations = $query->orderBy('idPostulation', 'desc')->paginate(20);
 
-            if ($request->filled('idCompany')) {
-                $query->where('idCompany', $request->idCompany);
-            }
-
-            $perPage = $request->get('perPage', 15);
-            $postulations = $query->orderBy('idPostulation', 'desc')->paginate($perPage);
-            $collection = new PostulationCollection($postulations);
-
-            return response()->json([
-                'success' => true,
-                ...$collection->resolve()
-            ]);
+            return response()->json(new PostulationCollection($postulations));
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener las postulaciones',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 
-    //Ver una postulación específica
+    // Obtener una postulación específica
     public function show($id): JsonResponse
     {
         try {
-            $postulation = Postulation::with(['vacante'])->find($id);
+            $postulation = Postulation::with(['vacante', 'user', 'program'])->find($id);
 
             if (!$postulation) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Postulación no encontrada'
+                    'message' => 'Postulación no encontrada',
                 ], 404);
             }
 
             return response()->json([
-                'success' => true,
-                'postulation' => new PostulationResource($postulation)
+                'success'     => true,
+                'postulation' => new PostulationResource($postulation),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener la postulación',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 
-    //Postulaciones de un usuario específico
+    // Postulaciones de un usuario específico
     public function byUser($userId): JsonResponse
     {
         try {
-            $postulations = Postulation::with(['vacante'])
+            $postulations = Postulation::with(['vacante', 'program'])
                 ->where('idUser', $userId)
                 ->orderBy('idPostulation', 'desc')
                 ->get();
 
             return response()->json([
-                'success' => true,
+                'success'      => true,
                 'postulations' => PostulationResource::collection($postulations),
-                'total' => $postulations->count()
+                'total'        => $postulations->count(),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener las postulaciones del usuario',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 
-    //Postulaciones de una vacante específica
+    // Postulaciones de una vacante específica
+    // => Aquí se cumple: ver postulantes de una vacante (nombre, foto, carrera, cv)
     public function byVacante($vacanteId): JsonResponse
     {
         try {
-            $postulations = Postulation::with(['vacante'])
+            $postulations = Postulation::with(['user', 'program', 'vacante'])
                 ->where('idVacant', $vacanteId)
                 ->orderBy('idPostulation', 'desc')
                 ->get();
 
             return response()->json([
-                'success' => true,
+                'success'      => true,
                 'postulations' => PostulationResource::collection($postulations),
-                'total' => $postulations->count()
+                'total'        => $postulations->count(),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener las postulaciones de la vacante',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 
-    // Actualizar estado de la postulación
+    // Actualizar estado de la postulación (Pendiente, Aceptada, Rechazada)
     public function updateStatus(Request $request, $id): JsonResponse
     {
         try {
             $request->validate([
-                'status' => 'required|string|max:50'
+                'status' => 'required|string|max:50',
             ]);
 
             $postulation = Postulation::find($id);
@@ -131,27 +119,56 @@ class PostulationController extends Controller
             if (!$postulation) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Postulación no encontrada'
+                    'message' => 'Postulación no encontrada',
                 ], 404);
             }
 
             $postulation->update(['status' => $request->status]);
 
             return response()->json([
-                'success' => true,
-                'message' => 'Estado actualizado exitosamente',
-                'postulation' => new PostulationResource($postulation)
+                'success'     => true,
+                'message'     => 'Estado actualizado exitosamente',
+                'postulation' => new PostulationResource($postulation),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al actualizar el estado',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 
-    //Eliminar postulación
+    // Finalizar prácticas (atajo: status = 'Aceptada')
+    public function finish($id): JsonResponse
+    {
+        try {
+            $postulation = Postulation::find($id);
+
+            if (!$postulation) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Postulación no encontrada',
+                ], 404);
+            }
+
+            $postulation->update(['status' => 'Aceptada']);
+
+            return response()->json([
+                'success'     => true,
+                'message'     => 'Prácticas finalizadas para esta postulación',
+                'postulation' => new PostulationResource($postulation),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al finalizar las prácticas',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // Eliminar postulación
     public function destroy($id): JsonResponse
     {
         try {
@@ -160,7 +177,7 @@ class PostulationController extends Controller
             if (!$postulation) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Postulación no encontrada'
+                    'message' => 'Postulación no encontrada',
                 ], 404);
             }
 
@@ -168,14 +185,15 @@ class PostulationController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Postulación eliminada exitosamente'
+                'message' => 'Postulación eliminada exitosamente',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al eliminar la postulación',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
 }
+

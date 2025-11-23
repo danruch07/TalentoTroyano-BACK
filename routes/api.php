@@ -8,6 +8,7 @@ use App\Modules\Vacantes\Controllers\StatsController;
 
 require base_path('app/Modules/Autenticacion/rutas.php');
 require base_path('app/Modules/Usuarios/rutas.php');
+require base_path('app/Modules/Usuarios/rutas_admin_uaq.php');
 require base_path('app/Modules/Documentos/rutas.php');
 
 Route::get('/user', function (Request $request) {
@@ -44,6 +45,7 @@ Route::get('/user', function (Request $request) {
     Route::get('/', [PostulationController::class, 'index']);
     Route::get('/{id}', [PostulationController::class, 'show']);
     Route::patch('/{id}/status', [PostulationController::class, 'updateStatus']);
+    Route::patch('/{id}/finish', [PostulationController::class, 'finish']);
     Route::delete('/{id}', [PostulationController::class, 'destroy']);
 });
 
